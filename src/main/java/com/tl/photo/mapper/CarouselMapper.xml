@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tl.photo.mapper.CarouselMapper">
+
+    <resultMap id="CarouselMap" type="Carousel">
+        <id property="carouselId" column="carousel_id"/>
+        <result property="carouselTitle" column="carousel_title"/>
+        <result property="carouselPath" column="carousel_path"/>
+        <result property="carouselUrl" column="carousel_url"/>
+        <result property="carouselUploadTime" column="carousel_upload_time"/>
+        <result property="carouselStatus" column="carousel_status"/>
+    </resultMap>
+    <!--查询状态是否有不同的值使用-->
+    <resultMap id="CarouselMapVo" type="CarouselVo">
+        <id property="carouselId" column="carousel_id"/>
+        <result property="carouselTitle" column="carousel_title"/>
+        <result property="carouselPath" column="carousel_path"/>
+        <result property="carouselUrl" column="carousel_url"/>
+        <result property="carouselUploadTime" column="carousel_upload_time"/>
+        <result property="carouselStatus" column="carousel_status"/>
+    </resultMap>
+
+    <!--添加轮播图-->
+    <insert id="addCarousel">
+        <foreach collection="list" item="item">
+            insert into
+            t_carousel(carousel_title,carousel_path,carousel_url,carousel_upload_time,carousel_status)
+            values
+            (#{item.carouselTitle},#{item.carouselPath},#{item.carouselUrl},#{item.carouselUploadTime},#{item.carouselStatus})
+        </foreach>
+    </insert>
+    <!--查询全部-->
+    <select id="findAll" resultType="Carousel" resultMap="CarouselMap">
+        select * from t_carousel
+    </select>
+    <!--根据轮播图id查询-->
+    <select id="findByCarouselId" parameterType="Integer" resultType="Carousel" resultMap="CarouselMap">
+        select * from t_carousel
+        where carousel_id = #{id}
+    </select>
+    <!--查询状态是否有不同的值-->
+    <select id="findByCarouselStatusDistinct" resultType="CarouselVo" resultMap="CarouselMapVo">
+        select DISTINCT carousel_status
+        from t_carousel
+    </select>
+    <!--根据id开启状态-->
+    <update id="openStatusByCarouselId" parameterType="Integer">
+        update t_carousel
+        <set>
+            carousel_status = 1
+        </set>
+        <where>
+            carousel_id = #{id}
+        </where>
+    </update>
+    <!--根据id关闭启用状态-->
+    <update id="closeStatusByCarouselId" parameterType="Integer">
+        update t_carousel
+        <set>
+            carousel_status = 0
+        </set>
+        <where>
+            carousel_id = #{id}
+        </where>
+    </update>
+    <!--根据id删除轮播图-->
+    <delete id="deleteCarouselById" parameterType="Integer">
+        delete from t_carousel
+        <where>
+            carousel_id = #{id}
+        </where>
+    </delete>
+    <!--根据轮播图标题查询内容-->
+    <select id="findByCarouselTitle" resultType="Carousel" resultMap="CarouselMap">
+        select * from t_carousel
+        <where>
+            carousel_title like concat('%',#{carouselTitle},'%')
+        </where>
+    </select>
+    <!--查询启用状态的轮播图-->
+    <select id="findByOpenStatus" resultType="Carousel" resultMap="CarouselMap">
+        select * from t_carousel
+        <where>
+            carousel_status = 1
+        </where>
+    </select>
+
+</mapper>

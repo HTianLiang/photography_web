@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tl.photo.mapper.CommentsMapper">
+
+    <resultMap id="CommentsMap" type="Comments">
+        <id property="id" column="id"/>
+        <result property="usersId" column="users_id"/>
+        <result property="username" column="username"/>
+        <result property="avatarPic" column="avatar_pic"/>
+        <result property="worksId" column="works_id"/>
+        <result property="content" column="content"/>
+        <result property="createTime" column="create_time"/>
+        <result property="commentIp" column="comment_ip"/>
+        <result property="commentStatus" column="comment_status"/>
+        <result property="auditTime" column="audit_time"/>
+    </resultMap>
+
+    <!--保存评论内容-->
+    <insert id="saveComments">
+        insert into t_comments(users_id,username,avatar_pic,works_id,content,create_time,comment_ip,comment_status)
+        values
+        (#{usersId},#{username},#{avatarPic},#{worksId},#{content},#{createTime},#{commentIp},#{commentStatus})
+    </insert>
+    <!--查询全部-->
+    <select id="findAll" resultType="Comments" resultMap="CommentsMap">
+        select * from t_comments
+    </select>
+    <!--审核通过-->
+    <update id="auditPass" parameterType="Comments">
+        update t_comments
+        <set>
+            comment_status = 1,
+            audit_time = now()
+        </set>
+        <where>
+            id = #{id}
+        </where>
+    </update>
+    <!--审核不通过-->
+    <update id="auditNotPass" parameterType="Comments">
+        update t_comments
+        <set>
+            comment_status = 0,
+            audit_time = now()
+        </set>
+        <where>
+            id = #{id}
+        </where>
+    </update>
+
+    <!--根据输入条件查询内容-->
+    <select id="findByCommentOption" parameterType="Comments" resultType="Comments" resultMap="CommentsMap">
+        select * from t_comments
+        <where>
+            <if test="commentStatus != null and commentStatus != '' or commentStatus == 0">
+                or comment_status = #{commentStatus}
+            </if>
+            <if test="username != null">
+                or username = #{username}
+            </if>
+        </where>
+    </select>
+
+    <!--根据作品ID查询评论内容且审核通过的-->
+    <select id="findCommentByWorksId" parameterType="Integer" resultType="Comments" resultMap="CommentsMap">
+        select * from t_comments
+        <where>
+            works_id = #{worksId}
+            and
+            comment_status = 1
+        </where>
+    </select>
+
+</mapper>

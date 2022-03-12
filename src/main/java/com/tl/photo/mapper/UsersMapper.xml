@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tl.photo.mapper.UsersMapper">
+
+    <resultMap id="UsersMap" type="Users">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="avatarPic" column="avatar_pic"/>
+        <result property="name" column="name"/>
+        <result property="sex" column="sex"/>
+        <result property="age" column="age"/>
+        <result property="origin" column="origin"/>
+        <result property="nationality" column="nationality"/>
+        <result property="phone" column="phone"/>
+        <result property="email" column="email"/>
+        <result property="city" column="city"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <!-- 新增用户 -->
+    <insert id="addUser">
+        <foreach collection="list" item="item">
+            insert into
+            t_users(username,password,avatar_pic,name,sex,origin,nationality,phone,city,create_time)
+            values
+            (#{item.username},#{item.password},#{item.avatarPic},#{item.name},#{item.sex},
+            #{item.origin},#{item.nationality},#{item.phone},#{item.city},#{item.createTime})
+        </foreach>
+    </insert>
+
+    <!-- 查询全部用户 -->
+    <select id="findUsersAll" resultType="Users" resultMap="UsersMap">
+        select * from t_users
+    </select>
+
+    <!-- 根据用户名和密码查询用户 -->
+    <select id="findByUsernameAndPassword" resultType="Users" resultMap="UsersMap">
+        select * from t_users
+        <where>
+            <if test="username != null">
+                username = #{username}
+            </if>
+            and
+            <if test="password != null">
+                password = #{password}
+            </if>
+        </where>
+    </select>
+
+    <!-- 根据用户名查询用户 -->
+    <select id="findByUsername" resultType="Users" resultMap="UsersMap">
+        select * from t_users
+        <where>
+            <if test="username != null">
+                username = #{username}
+            </if>
+        </where>
+    </select>
+
+    <!--根据用户id查询-->
+    <select id="findByUsersId" resultType="Users" resultMap="UsersMap">
+        select * from t_users
+        <where>
+            id = #{usersId}
+        </where>
+    </select>
+
+    <!--修改信息-->
+    <update id="updateInfo" parameterType="Users">
+        update t_users
+        set username = #{username}, name = #{name}, sex = #{sex}, age = #{age}, origin = #{origin},
+            nationality = #{nationality}, phone = #{phone}, email = #{email}, city = #{city}
+        <where>
+            id = #{id}
+        </where>
+    </update>
+
+</mapper>

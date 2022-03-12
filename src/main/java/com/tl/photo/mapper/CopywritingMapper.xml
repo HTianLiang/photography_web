@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tl.photo.mapper.CopywritingMapper">
+
+    <resultMap id="CopywritingMap" type="Copywriting">
+        <id property="copywritingId" column="copywriting_id"/>
+        <result property="copywritingTitle" column="copywriting_title"/>
+        <result property="copywritingContent" column="copywriting_content"/>
+        <result property="copywritingStatus" column="copywriting_status"/>
+    </resultMap>
+
+    <!--新增文案-->
+    <insert id="addCopywriting">
+        <foreach collection="list" item="item">
+            insert into
+            t_copywriting(copywriting_title,copywriting_content,copywriting_status)
+            values
+            (#{item.copywritingTitle},#{item.copywritingContent},#{item.copywritingStatus})
+        </foreach>
+    </insert>
+    <!--查询全部-->
+    <select id="findAll" resultType="Copywriting" resultMap="CopywritingMap">
+        select * from t_copywriting
+    </select>
+    <!--修改文案信息-->
+    <update id="updateCopywriting" parameterType="Copywriting">
+        update t_copywriting
+        <set>
+            <if test="copywritingTitle != null">
+                copywriting_title = #{copywritingTitle},
+            </if>
+            <if test="copywritingContent != null">
+                copywriting_content = #{copywritingContent},
+            </if>
+            <if test="copywritingStatus != null">
+                copywriting_status = #{copywritingStatus},
+            </if>
+        </set>
+        <where>
+            copywriting_id = #{copywritingId}
+        </where>
+    </update>
+    <!--根据id删除文案-->
+    <delete id="deleteCopywritingById" parameterType="Integer">
+        delete from t_copywriting
+        where copywriting_id = #{id}
+    </delete>
+
+    <!--查询状态是否有不同的值-->
+    <select id="findByCopywritingStatusDistinct" resultType="Copywriting" resultMap="CopywritingMap">
+        select DISTINCT copywriting_status
+        from t_copywriting
+    </select>
+
+    <!--根据id开启状态-->
+    <update id="openStatusByCopywritingId" parameterType="Integer">
+        update t_copywriting
+        <set>
+            copywriting_status = 1
+        </set>
+        <where>
+            copywriting_id = #{id}
+        </where>
+    </update>
+
+    <!--根据id关闭启用状态-->
+    <update id="closeStatusByCopywritingId" parameterType="Integer">
+        update t_copywriting
+        <set>
+            copywriting_status = 0
+        </set>
+        <where>
+            copywriting_id = #{id}
+        </where>
+    </update>
+
+    <!--根据文案标题查询内容-->
+    <select id="findByCopywritingTitle" resultType="Copywriting" resultMap="CopywritingMap">
+        select * from t_copywriting
+        <where>
+            copywriting_title like concat('%',#{copywritingTitle},'%')
+        </where>
+    </select>
+
+    <!--查询开启状态-->
+    <select id="findByOpenStatus" resultType="Copywriting" resultMap="CopywritingMap">
+        select * from t_copywriting
+        <where>
+            copywriting_status = 1
+        </where>
+    </select>
+
+</mapper>

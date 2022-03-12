@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tl.photo.mapper.LinksMapper">
+
+    <resultMap id="LinksMap" type="Links">
+        <id property="linksId" column="links_id"/>
+        <result property="linksName" column="links_name"/>
+        <result property="linksAddress" column="links_address"/>
+        <result property="linksStatus" column="links_status"/>
+    </resultMap>
+
+    <!--查询全部-->
+    <select id="findAll" resultType="Links" resultMap="LinksMap">
+        select * from t_links
+    </select>
+    <!--添加友情链接-->
+    <insert id="addLinks">
+        <foreach collection="list" item="item">
+            insert into
+            t_links(links_name,links_address,links_status)
+            values
+            (#{item.linksName},#{item.linksAddress},#{item.linksStatus})
+        </foreach>
+    </insert>
+    <!--根据id查询-->
+    <select id="findByLinksId" parameterType="Integer" resultType="Links" resultMap="LinksMap">
+        select * from t_links
+        where links_id = #{id}
+    </select>
+    <!--修改友情链接-->
+    <update id="updateLinks" parameterType="Links">
+        update t_links
+        <set>
+            <if test="linksName != null">
+                links_name = #{linksName},
+            </if>
+            <if test="linksAddress != null">
+                links_address = #{linksAddress},
+            </if>
+            <if test="linksName != null">
+                links_status = #{linksStatus},
+            </if>
+        </set>
+        <where>
+            links_id = #{linksId}
+        </where>
+    </update>
+    <!--根据id删除友情链接-->
+    <delete id="deleteLinksById" parameterType="Integer">
+        delete from t_links
+        where links_id = #{id}
+    </delete>
+    <!--修改友情链接状态为启用状态-->
+    <update id="updateLinksStatusOpen" parameterType="Links">
+        update t_links
+        <set>
+            <if test="linksStatus != null">
+                links_status = 1,
+            </if>
+        </set>
+        <where>
+            links_id = #{linksId}
+        </where>
+    </update>
+    <!--关闭友情链接启用状态-->
+    <update id="updateLinksStatusClose" parameterType="Links">
+        update t_links
+        <set>
+            <if test="linksStatus != null">
+                links_status = 0,
+            </if>
+        </set>
+        <where>
+            links_id = #{linksId}
+        </where>
+    </update>
+    <!--根据友情链接名称查询内容-->
+    <select id="findByLinksName" resultType="Links" resultMap="LinksMap">
+        select * from t_links
+        <where>
+            links_name like concat('%',#{linksName},'%')
+        </where>
+    </select>
+    <!--查询开启状态-->
+    <select id="findByOpenStatus" resultType="Links" resultMap="LinksMap">
+        select * from t_links
+        <where>
+            links_status = 1
+        </where>
+    </select>
+
+</mapper>

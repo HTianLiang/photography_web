@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tl.photo.mapper.WorksMapper">
+
+    <resultMap id="WorksMap" type="Works">
+        <id property="worksId" column="works_id"/>
+        <result property="worksTitle" column="works_title"/>
+        <result property="worksDesc" column="works_desc"/>
+        <result property="worksProp" column="works_prop"/>
+        <result property="worksPath" column="works_path"/>
+        <result property="worksUrl" column="works_url"/>
+        <result property="worksPublishTime" column="works_publish_time"/>
+        <result property="worksPublishIp" column="works_publish_ip"/>
+        <result property="worksAuditTime" column="works_audit_time"/>
+        <result property="worksStatus" column="works_status"/>
+        <result property="watchNum" column="watch_num"/>
+        <result property="usersId" column="users_id"/>
+    </resultMap>
+    <resultMap id="WorksVoMap" type="WorksVo">
+        <id property="worksId" column="works_id"/>
+        <result property="worksTitle" column="works_title"/>
+        <result property="worksDesc" column="works_desc"/>
+        <result property="worksProp" column="works_prop"/>
+        <result property="worksPath" column="works_path"/>
+        <result property="worksUrl" column="works_url"/>
+        <result property="worksPublishTime" column="works_publish_time"/>
+        <result property="worksPublishIp" column="works_publish_ip"/>
+        <result property="worksAuditTime" column="works_audit_time"/>
+        <result property="worksStatus" column="works_status"/>
+        <result property="watchNum" column="watch_num"/>
+        <result property="usersId" column="users_id"/>
+        <collection property="users" ofType="Users">
+            <id property="id" column="id"/>
+            <result property="username" column="username"/>
+            <result property="password" column="password"/>
+            <result property="avatarPic" column="avatar_pic"/>
+            <result property="name" column="name"/>
+            <result property="sex" column="sex"/>
+            <result property="age" column="age"/>
+            <result property="origin" column="origin"/>
+            <result property="nationality" column="nationality"/>
+            <result property="phone" column="phone"/>
+            <result property="email" column="email"/>
+            <result property="city" column="city"/>
+            <result property="createTime" column="create_time"/>
+        </collection>
+    </resultMap>
+
+    <!--发布作品-->
+    <insert id="worksPublish">
+        <foreach collection="list" item="item">
+            insert into
+            t_works(works_title,works_desc,works_prop,works_path,works_url,works_publish_time,
+            works_publish_ip,works_audit_time,works_status,users_id)
+            values (#{item.worksTitle},#{item.worksDesc},#{item.worksProp},#{item.worksPath},#{item.worksUrl},
+            #{item.worksPublishTime},#{item.worksPublishIp},#{item.worksAuditTime},#{item.worksStatus},#{item.usersId})
+        </foreach>
+    </insert>
+
+    <!--查询全部作品-->
+    <select id="findByWorksAll" resultType="Works" resultMap="WorksMap">
+        select * from t_works
+    </select>
+
+    <!--根据作品id修改审核状态-通过-->
+    <update id="auditPassWorksByWorksId" parameterType="Works">
+        update t_works
+        <set>
+            works_status = 1,
+            works_audit_time = now()
+        </set>
+        <where>
+            works_id = #{worksId}
+        </where>
+    </update>
+    <!--根据作品id修改审核状态-不通过-->
+    <update id="auditNotPassWorksByWorksId" parameterType="Works">
+        update t_works
+        <set>
+            works_status = 0,
+            works_audit_time = now()
+        </set>
+        <where>
+            works_id = #{worksId}
+        </where>
+    </update>
+
+    <!--根据作品id查询-->
+    <select id="findByWorksId" resultType="Works" resultMap="WorksMap">
+        select * from t_works
+        <where>
+            works_id = #{worksId}
+        </where>
+    </select>
+
+    <!--根据作品条件查询内容-->
+    <select id="findByWorksOption" parameterType="Works" resultType="Works" resultMap="WorksMap">
+        select * from t_works
+        <where>
+            <if test="worksStatus != null and worksStatus != '' or worksStatus == 0">
+                or works_status = #{worksStatus}
+            </if>
+            <if test="worksTitle != null and worksTitle != ''">
+                or works_title like concat('%',#{worksTitle},'%')
+            </if>
+            <if test="worksProp != null and worksProp != '' or worksProp == 0">
+                or works_prop = #{worksProp}
+            </if>
+            <if test="usersId != null and usersId != '' or usersId == 0">
+                or users_id = #{usersId}
+            </if>
+        </where>
+    </select>
+
+    <!--修改作品-->
+    <update id="updateWorks" parameterType="Works">
+        update t_works
+        <set>
+            <if test="worksTitle != null">
+                works_title = #{worksTitle},
+            </if>
+            <if test="worksDesc != null">
+                works_desc = #{worksDesc},
+            </if>
+            <if test="worksProp != null">
+                works_prop = #{worksProp},
+            </if>
+        </set>
+        <where>
+            works_id = #{worksId}
+        </where>
+    </update>
+
+    <!--统计用户作品总条数-->
+    <select id="findWorksCountByUsersId" parameterType="Integer" resultType="Integer">
+        select count(*) from t_works
+        <where>
+            users_id = #{usersId}
+        </where>
+    </select>
+
+    <!--根据用户ID查询作品-->
+    <select id="findByUsersId" parameterType="Works" resultType="Works" resultMap="WorksMap">
+        select * from t_works
+        <where>
+            users_id = #{usersId}
+        </where>
+    </select>
+    
+    <!--查询审核通过的全部用户作品-->
+    <select id="findAuditPassAllByUsers" resultMap="WorksVoMap">
+        select * from t_users t1,
+        (select * from t_works where works_status = 1) t2
+        where
+        t1.id = t2.users_id
+        and
+        t2.works_prop = 1
+    </select>
+
+    <!--更新作品浏览量-->
+    <update id="updateWorksWatchNum" parameterType="Integer">
+        update t_works
+        set watch_num = watch_num + 1
+        <where>
+            works_id = #{worksId}
+        </where>
+    </update>
+
+    <!--查询作品浏览量大于1的内容,并且从大到小进行排序-->
+    <select id="findByWatchNumBiggerOne" resultType="Works" resultMap="WorksMap">
+        select * from t_works
+        <where>
+            watch_num > 1
+            and
+            works_status = 1
+        </where>
+        order by watch_num DESC
+    </select>
+
+</mapper>
